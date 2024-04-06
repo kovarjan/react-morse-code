@@ -1,0 +1,39 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+
+.card {
+  padding: 2em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 2em;
+}
+
+.inputField {
+  min-width: 20em;
+}
+
+
+.output {
+  font-size: 2em;
+  font-weight: 500;
+  color: #0a3d62;
+  text-align: center;
+  letter-spacing: 2px;
+  max-width: 80%;
+  text-align: center;
+  margin: 0 auto;
+  margin-top: 2em;
+}
+
+.waveformCanvas {
+  position: absolute;
+  bottom: 0px;
+  border: 1px solid #0a3d62;
+}
