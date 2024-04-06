@@ -5,6 +5,9 @@
   text-align: center;
 }
 
+h1 {
+  margin-bottom: 1em;
+}
 
 .card {
   padding: 2em;
@@ -19,7 +22,6 @@
   min-width: 20em;
 }
 
-
 .output {
   font-size: 2em;
   font-weight: 500;
@@ -32,8 +34,16 @@
   margin-top: 2em;
 }
 
-.waveformCanvas {
-  position: absolute;
-  bottom: 0px;
-  border: 1px solid #0a3d62;
+.audioVisualizer {
+  width: 100%;
+  margin-top: 6em;
+}
+
+button {
+  display: block;
+  padding-top: 4px !important;
+}
+
+.MuiSvgIcon-root {
+  transform: translate(-0.2em, 0.2em);
 }

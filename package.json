@@ -11,6 +11,12 @@
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.24.1",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@mui/icons-material": "^5.15.15",
+    "@mui/material": "^5.15.15",
     "audiobuffer-to-blob": "^1.0.2",
     "react": "^18.2.0",
     "react-audio-visualize": "^1.1.3",

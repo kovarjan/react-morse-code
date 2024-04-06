@@ -1,24 +1,21 @@
 import { useState, useEffect } from "react";
 import { AudioVisualizer } from 'react-audio-visualize';
 import audiobufferToBlob from 'audiobuffer-to-blob';
-import "./App.css";
-import WaveForm from "./WaveForm";
-
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import DownloadIcon from '@mui/icons-material/Download';
 import morseEncoder from './utils/morseEncoder';
-
 import dot from "./assets/dot.mp3";
 import dash from "./assets/dash.mp3";
 import pause from "./assets/pause.mp3";
 import longPause from "./assets/long_pause.mp3";
+import "./App.css";
 
 function App() {
-    const [count, setCount] = useState(0);
     const [blob, setBlob] = useState();
-    const [playing, setPlaying] = useState(false);
     const [timePlayed, setTimePlayed] = useState(0);
-    const [analyzerData, setAnalyzerData] = useState(null);
     const [input, setInput] = useState("");
     const [output, setOutput] = useState("");
+    const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
         if(input && input.length > 0) {
@@ -26,11 +23,15 @@ function App() {
         }
     }, [input])
 
-
+    /**
+     * joinAudioTracks - Joins multiple audio tracks into a single audio track.
+     * @param {array} audioTracks 
+     */
     async function joinAudioTracks(audioTracks) {
         let context = new (window.AudioContext || window.webkitAudioContext)();
         let buffers = [];
-      
+        setIsPlaying(true);
+
         // Load each audio track and decode it into audio buffer
         for (let track of audioTracks) {
           let buffer = await fetch(track)
@@ -54,9 +55,8 @@ function App() {
           offset += channelData.length;
         });
 
+        // Convert the concatenated buffer to a blob to visualize waveform
         const blob = audiobufferToBlob(concatenatedBuffer);
-        console.log("blob", blob);
-
         setBlob(blob);
 
         // Play the concatenated audio
@@ -68,110 +68,21 @@ function App() {
             setTimePlayed(source.context.currentTime);
         }, 10);
 
-        setPlaying(true);
-
         // get time played
         source.onended = () => {
             setTimePlayed(source.context.currentTime);
             clearInterval(progressInterval);
-            setPlaying(false);
+            setIsPlaying(false);
         };
 
         source.start();
     }
 
-      
-      
-
-    // Function to join audio tracks
-    const joinAudioTracks_old = (audioTracks) => {
-        let context = new (window.AudioContext || window.webkitAudioContext)();
-        let buffers = [];
-
-        // Load each audio track and decode it into audio buffer
-        let promises = audioTracks.map((track) => {
-            return fetch(track)
-                .then((response) => response.arrayBuffer())
-                .then((buffer) => context.decodeAudioData(buffer))
-                .then((decodedBuffer) => {
-                    buffers.push(decodedBuffer);
-                });
-        });
-
-        // When all tracks are loaded and decoded
-        Promise.all(promises).then(() => {
-            let totalDuration = buffers.reduce(
-                (acc, buffer) => acc + buffer.duration,
-                0
-            );
-
-            console.log("totalDuration", totalDuration);
-
-            // Concatenate audio buffers
-            let concatenatedBuffer = context.createBuffer(
-                1,
-                context.sampleRate * totalDuration,
-                context.sampleRate
-            );
-
-            console.log("concatenatedBuffer", concatenatedBuffer);
-            let offset = 0;
-            // ERROR: Uncaught (in promise) RangeError: offset is out of bounds at Float32Array.set (<anonymous>)
-            buffers.forEach((buffer) => {
-                console.log("buffer", buffer);
-                console.log("offset", offset);
-                concatenatedBuffer
-                    .getChannelData(0)
-                    .set(buffer.getChannelData(0), offset);
-                offset += buffer.length;
-            });
-
-            console.log("buffers", buffers);
-
-            const blob = audiobufferToBlob(concatenatedBuffer);
-            console.log("blob", blob);
-
-            setBlob(blob);
-
-
-            // analyze the audio
-            const analyzer = context.createAnalyser();
-            analyzer.fftSize = 2048;
-        
-            const bufferLength = analyzer.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-          
-            // Play the concatenated audio
-            let source = context.createBufferSource();
-            source.buffer = concatenatedBuffer;
-            source.connect(context.destination);
-
-            source.connect(analyzer);
-            source.onended = () => {
-                source.disconnect();
-            };
-
-            const progressInterval = setInterval(() => {
-                setTimePlayed(source.context.currentTime);
-            }, 10);
-
-            setPlaying(true);
-
-            // get time played
-            source.onended = () => {
-                setTimePlayed(source.context.currentTime);
-                clearInterval(progressInterval);
-                setPlaying(false);
-            };
-
-            source.start();
-            
-            setAnalyzerData({ analyzer, bufferLength, dataArray });
-            
-            console.log("source", source);
-        });
-    }
-
+    /**
+     * composeTracks - Compose audio tracks for each Morse code character.
+     * @param {string} morseCode
+     * @returns {array}
+     */
     const composeTracks = (morseCode) => {
         const tracks = [];
         const morseArray = morseCode.split(" ");
@@ -193,24 +104,42 @@ function App() {
         return tracks;
     };
 
+    /**
+     * handlePlay - Handle play button click event.
+     */
     const handlePlay = () => {
+        if (!input || input.length === 0 || isPlaying) {
+            return;
+        }
+
         const out = morseEncoder(input);
         setOutput(out);
 
-        console.log("out", out);
-
-        const tracks = composeTracks(out);
-        console.log("tracks", tracks);
-
-        let audioTracks = tracks; // Paths to your audio tracks
+        let audioTracks = composeTracks(out);
         joinAudioTracks(audioTracks);
     };
 
+    /**
+     * handleEncode - Handle encode button click event.
+     */
     const handleEncode = () => {
-        const out = morseEncoder(input);
-        setOutput(out);
+        setOutput(morseEncoder(input));
+    }
 
-        console.log("out", out);
+    /**
+     * handleExportTrack - Handle export audio track button click event.
+     * Export the audio track as a WAV file.
+     */
+    const handleExportTrack = () => {
+        if (!blob) {
+            return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'morse-code.wav';
+        a.click();
     }
     
     return (
@@ -230,44 +159,31 @@ function App() {
                 />
 
                 <button onClick={handlePlay}>
+                    <PlayArrowIcon fontSize={"small"} />
                     Play audio
+                </button>
+                <button onClick={handleExportTrack}>
+                    <DownloadIcon fontSize={"small"} />
+                    Export audio
                 </button>
             </div>
 
             <h2 className="output">{output}</h2>
 
-            <br/>
-            <br/>
-            {/* <AudioVisualizer
-                 ref={visualizerRef}
-                 blob={blob}
-                 width={500}
-                 height={75}
-                 barWidth={1}
-                 gap={0}
-                 barColor={'#f76565'}
-             /> */}
-
-            {blob && (
-                
-                <AudioVisualizer
-                    blob={blob}
-                    width={800}
-                    height={80}
-                    barWidth={3}
-                    gap={1}
-                    barColor={'#f76565'}
-                    barPlayedColor={'#00BAFF'}
-                    currentTime={timePlayed}
-                />
-            )}
-
-            <br/>
-            <br/>
-
-            {/* {analyzerData && <WaveForm analyzerData={analyzerData} />} */}
-            
-
+            <div className="audioVisualizer">
+                {blob && (
+                    <AudioVisualizer
+                        blob={blob}
+                        width={window.innerWidth - 80}
+                        height={80}
+                        barWidth={3}
+                        gap={1}
+                        barColor={'#78e08f'}
+                        barPlayedColor={'#38ada9'}
+                        currentTime={timePlayed}
+                    />
+                )}
+            </div>
         </>
     );
 }
