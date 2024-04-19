@@ -18,7 +18,7 @@ function App() {
     const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
-        if(input && input.length > 0) {
+        if (input && input.length > 0) {
             handleEncode();
         }
     }, [input])
@@ -34,25 +34,25 @@ function App() {
 
         // Load each audio track and decode it into audio buffer
         for (let track of audioTracks) {
-          let buffer = await fetch(track)
-            .then(response => response.arrayBuffer())
-            .then(buffer => context.decodeAudioData(buffer));
-          buffers.push(buffer);
+            let buffer = await fetch(track)
+                .then(response => response.arrayBuffer())
+                .then(buffer => context.decodeAudioData(buffer));
+            buffers.push(buffer);
         }
-      
+
         // Calculate total duration and length of the concatenated buffer
         let totalDuration = buffers.reduce((acc, buffer) => acc + buffer.duration, 0);
         let totalLength = Math.ceil(totalDuration * context.sampleRate);
-      
+
         // Create concatenated buffer with dynamically allocated memory
         let concatenatedBuffer = context.createBuffer(1, totalLength, context.sampleRate);
         let offset = 0;
-      
+
         // Copy data from each buffer into the concatenated buffer
         buffers.forEach(buffer => {
-          let channelData = buffer.getChannelData(0);
-          concatenatedBuffer.getChannelData(0).set(channelData, offset);
-          offset += channelData.length;
+            let channelData = buffer.getChannelData(0);
+            concatenatedBuffer.getChannelData(0).set(channelData, offset);
+            offset += channelData.length;
         });
 
         // Convert the concatenated buffer to a blob to visualize waveform
@@ -141,7 +141,7 @@ function App() {
         a.download = 'morse-code.wav';
         a.click();
     }
-    
+
     return (
         <>
             <h1>Morse code encoder</h1>
