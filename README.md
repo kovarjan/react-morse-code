@@ -106,7 +106,8 @@ App can be used to encode text to Morse code and play it back as audio. It can a
 The documentation of function of [react-morse-code](https://github.com/kovarjan/react-morse-code)
 
 ### App.jsx
-#### handleEncode()
+----
+#### handleEncode()
 Function is run by useEffect hook when the text changes. It encodes the text to Morse code and sets the state of the encoded text. Using function morseEncoder(input) from utils/morseEncoder.js.
 
 #### handlePlay()
@@ -126,7 +127,8 @@ Function is run when the export button is clicked. It exports the Morse code as 
 Component that visualizes the audio track from audio blob. It uses the Web Audio API to create an audio context and an analyser node. It then draws the audio waveform. Played position is updated by setInterval in joinAudioTracks(audioTracks) function every 10ms.
 
 ### utils/morseEncoder.js
-#### morseEncoder(input)
+----
+#### morseEncoder(input)
 Function takes a string input and encodes it to Morse code. It uses a switch statement to encode each character to Morse code. It then returns the Morse code as a string.
 
 <!-- LICENSE -->
