@@ -17,7 +17,7 @@
   <h3 align="center">React Morse code encoder</h3>
 
   <p align="center">
-    An awesome README template to jumpstart your projects!
+    A simple Morse code encoder with audio output
     <br />
     <a href="https://morsecode-encoder.earc.eu/"><strong>View Demo »</strong></a>
     <br />
