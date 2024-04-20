@@ -111,7 +111,6 @@ function App() {
         if (!input || input.length === 0 || isPlaying) {
             return;
         }
-
         const out = morseEncoder(input);
         setOutput(out);
 
